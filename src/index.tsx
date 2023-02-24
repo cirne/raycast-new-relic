@@ -1,5 +1,5 @@
-import { ActionPanel, Action, List, Icon, Color } from "@raycast/api";
-import { useFetch, Response } from "@raycast/utils";
+import { ActionPanel, Action, List, Icon, Color, getPreferenceValues } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 
 
@@ -42,12 +42,15 @@ const Severities: Record<SeverityKey, { color: Color, level: number }> = {
 
 interface Entity {
   name: string;
-  alertSeverity?: string;
+  alertSeverity?: SeverityKey;
   guid: string;
   entityType: EntityTypeKey;
-  domain: string;
   reporting?: boolean;
   permalink: string;
+}
+
+interface Preferences {
+  apiKey?: string;
 }
 
 export default function Command() {
@@ -62,7 +65,7 @@ export default function Command() {
       searchBarPlaceholder="Search New Relic..."
       throttle
     >
-      <List.Section title="Results" subtitle={data?.length + ""}>
+      <List.Section title="New Relic Entities" subtitle={data?.length + " items"}>
         {data?.map((searchResult: Entity) => (
           <SearchListItem key={searchResult.guid} searchResult={searchResult} />
         ))}
@@ -71,11 +74,13 @@ export default function Command() {
   );
 }
 
+
 function QueryForEntities(searchText: string) {
+  const { apiKey } = getPreferenceValues<Preferences>();
   const endpoint = 'https://api.newrelic.com/graphql';
 
-  // FIXME
-  const apiKey = 'NRAK-BURQGTB6VD2IHPN13N3S37S2S66';
+  // raycast won't call this until apiKey is defined, but lint is complaining
+  if (!apiKey) return { data: [], isLoading: false };
 
   const query = `{
     actor {
@@ -86,7 +91,6 @@ function QueryForEntities(searchText: string) {
             alertSeverity
             guid
             entityType
-            domain
             reporting
             permalink
           }
@@ -106,9 +110,6 @@ function QueryForEntities(searchText: string) {
     parseResponse: parseFetchResponse,
   });
 }
-
-
-
 function SearchListItem({ searchResult }: { searchResult: Entity }) {
 
   const { icon, description } = getEntityInfo(searchResult);
@@ -126,9 +127,8 @@ function SearchListItem({ searchResult }: { searchResult: Entity }) {
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard
-              title="Copy Install Command"
-              content={`npm install ${searchResult.name}`}
-              shortcut={{ modifiers: ["cmd"], key: "." }}
+              title="Copy URL"
+              content={`${searchResult.permalink}`}
             />
           </ActionPanel.Section>
         </ActionPanel>
@@ -138,18 +138,11 @@ function SearchListItem({ searchResult }: { searchResult: Entity }) {
 }
 
 function getEntityInfo(entity: Entity) {
-
-  const iconColors = {
-    NOT_ALERTING: Color.PrimaryText,
-    CRITICAL: Color.Red,
-    WARNING: Color.Yellow,
-    NOT_CONFIGURED: Color.SecondaryText,
-  }
   const { icon, description } = EntityTypes[entity.entityType] || { icon: Icon.QuestionMark, description: 'Unknown' };
-  const tintColor = iconColors[entity.alertSeverity] || Color.PrimaryText;
+  const severity = Severities[entity.alertSeverity || 'NOT_CONFIGURED'];
 
   return {
-    icon: { source: icon, tintColor },
+    icon: { source: icon, tintColor: severity.color },
     description
   }
 }
@@ -163,12 +156,16 @@ async function parseFetchResponse(response: Response) {
   return entities.filter((entity: Entity) => {
     return EntityTypes[entity.entityType];
   }).sort((e1: Entity, e2: Entity) => {
-    // sort first by whether reporting, then by severity, then by name
+    // sort dashboards first, then whether reporting, then by severity, then by name
+    if (e1.entityType !== e2.entityType) {
+      if (e1.entityType === 'DASHBOARD_ENTITY') return -1;
+      if (e2.entityType === 'DASHBOARD_ENTITY') return 1;
+    }
     if (e1.reporting !== e2.reporting) {
       return e1.reporting ? -1 : 1;
     }
     if (e1.alertSeverity !== e2.alertSeverity && e1.alertSeverity && e2.alertSeverity) {
-      return Severities[e1.alertSeverity].level - Severities[e2.alertSeverity].level;
+      return Severities[e2.alertSeverity].level - Severities[e1.alertSeverity].level;
     }
 
     return e1.name.localeCompare(e2.name);

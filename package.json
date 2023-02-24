@@ -14,7 +14,18 @@
       "name": "index",
       "title": "New Relic",
       "description": "Search for New Relic entities",
-      "mode": "view"
+      "mode": "view",
+      "icon": "newrelic-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "title": "New Relic API Key",
+      "description": "https://one.newrelic.com/api-keys",
+      "placeholder": "NRAK-***",
+      "required": true
     }
   ],
   "dependencies": {
