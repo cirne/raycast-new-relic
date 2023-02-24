@@ -44,7 +44,7 @@ const Severities: Record<SeverityKey, { color: Color, level: number }> = {
 
 interface Entity {
   name: string;
-  alertSeverity?: SeverityKey;
+  alertSeverity: SeverityKey | null;
   guid: string;
   entityType: EntityTypeKey;
   reporting?: boolean;
@@ -234,13 +234,18 @@ async function parseFetchResponse(response: Response) {
 
   const json = await response.json();
   const { entities } = json.data.actor.entitySearch.results;
+
+  // only show entity types we support
   return entities.filter((entity: Entity) => {
-    console.log(entity.name, entity.entityType)
-    return EntityTypes[entity.entityType] && entity.entityType !== 'DASHBOARD_ENTITY';
+    return EntityTypes[entity.entityType];
   }).sort((e1: Entity, e2: Entity) => {
-    // sort by severity
-    if (e1.alertSeverity !== e2.alertSeverity && e1.alertSeverity && e2.alertSeverity) {
-      return Severities[e2.alertSeverity].level - Severities[e1.alertSeverity].level;
+    // sort by severity, then dahsboards, then reporting, then name
+    if ((e1.alertSeverity || e2.alertSeverity)) {
+      const l1 = e1.alertSeverity ? Severities[e1.alertSeverity]?.level : 0;
+      const l2 = e2.alertSeverity ? Severities[e2.alertSeverity]?.level : 0;
+      if (l1 !== l2) return l2 - l1;
+      if (l1 > 1) return -1;
+      if (l2 > 1) return 1;
     }
     if (e1.entityType !== e2.entityType) {
       if (e1.entityType === 'DASHBOARD_ENTITY') return -1;
