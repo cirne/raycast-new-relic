@@ -13,7 +13,7 @@
     {
       "name": "index",
       "title": "New Relic",
-      "description": "Search for New Relic entities",
+      "description": "Search Applications, Dashboard, Alerts, and more in New Relic",
       "mode": "view",
       "icon": "newrelic-icon.png"
     }
@@ -23,8 +23,8 @@
       "name": "apiKey",
       "type": "password",
       "title": "New Relic API Key",
-      "description": "https://one.newrelic.com/api-keys",
-      "placeholder": "NRAK-***",
+      "description": "Your personal New Relic API Key",
+      "placeholder": "See https://one.newrelic.com/api-keys ",
       "required": true
     }
   ],
