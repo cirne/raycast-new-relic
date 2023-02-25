@@ -24,8 +24,8 @@ type EntityTypeKey = 'APM_APPLICATION_ENTITY' |
   'WORKLOAD_ENTITY';
 
 const EntityTypes: Record<EntityTypeKey, { icon: Icon; description: string }> = {
-  "APM_APPLICATION_ENTITY": { icon: Icon.AppWindowList, description: 'APM Application' },
-  "THIRD_PARTY_SERVICE_ENTITY": { icon: Icon.AppWindowList, description: 'Open Telemetry Application' },
+  "APM_APPLICATION_ENTITY": { icon: Icon.Globe, description: 'APM Application' },
+  "THIRD_PARTY_SERVICE_ENTITY": { icon: Icon.Globe, description: 'Open Telemetry Application' },
   "BROWSER_APPLICATION_ENTITY": { icon: Icon.Monitor, description: 'Browser Application' },
   "SYNTHETIC_MONITOR_ENTITY": { icon: Icon.Eye, description: 'Synthetic Monitor' },
   "MOBILE_APPLICATION_ENTITY": { icon: Icon.Mobile, description: 'Mobile Application' },
@@ -204,20 +204,20 @@ function getEntityInfo(entity: Entity) {
       `${Math.round(responseTimeAverage * 100)} ms,` +
       `${Math.round(throughput)} rpm`
   }
-  if (entity.browserSummary) {
+  else if (entity.browserSummary) {
     const { jsErrorRate, pageLoadThroughput, ajaxRequestThroughput } = entity.browserSummary;
     description = `${Math.round(jsErrorRate * 10000) / 100}% err ` +
       `${Math.round(pageLoadThroughput)} rpm ` +
       `${Math.round(ajaxRequestThroughput)} ajax`
   }
-  if (entity.hostSummary) {
+  else if (entity.hostSummary) {
     const { cpuUtilizationPercent, diskUsedPercent, memoryUsedPercent } = entity.hostSummary;
     description = `${Math.round(cpuUtilizationPercent)}% cpu ` +
       `${Math.round(diskUsedPercent)}% disk ` +
       `${Math.round(memoryUsedPercent)}% mem `
   }
-  if (entity.monitorSummary) {
-    const { locationsFailing, locationsRunning, status, successRate } = entity.monitorSummary;
+  else if (entity.monitorSummary) {
+    const { locationsFailing, locationsRunning, successRate } = entity.monitorSummary;
     description = `${Math.round(successRate * 10000) / 100}% success, ` +
       `${locationsFailing} / ${locationsRunning} locations failing`
   }
