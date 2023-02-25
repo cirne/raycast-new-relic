@@ -223,6 +223,7 @@ function SearchListItem({ searchResult }: { searchResult: Entity }) {
   );
 }
 
+/* parse the entity summary data into a format for display in the list */
 function getEntityInfo(entity: Entity) {
   const icon = EntityTypes[entity.entityType].icon;
   let description = EntityTypes[entity.entityType].description;
@@ -259,7 +260,7 @@ function getEntityInfo(entity: Entity) {
   };
 }
 
-/** Parse the response from the fetch query into something we can display */
+// Parse the entity query response from NerdGraph and check for errors
 async function parseFetchResponse(response: Response) {
   const json = await response.json();
   let errorMessage = json.errors?.[0]?.message;
