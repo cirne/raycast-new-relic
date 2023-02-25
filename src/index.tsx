@@ -78,10 +78,24 @@ interface Preferences {
   apiKey?: string;
 }
 
+const NrShortcuts = [
+  { title: 'Entity Explorer', url: "https://one.newrelic.com" },
+  { title: 'Alerts and AI', url: "https://one.newrelic.com/alerts-ai" },
+  { title: 'Errors Inbox', url: "https://one.newrelic.com/errors-inbox" },
+  { title: 'Dashboards', url: "https://one.newrelic.com/dashboards" },
+
+  { title: 'APM', "url": nr1ExplorerUrl("(filters=(domain IN ('APM', 'EXT') AND type IN ('APPLICATION', 'SERVICE')))") },
+  { title: 'Browser', "url": nr1ExplorerUrl("(domain='BROWSER' AND type='APPLICATION')") },
+  { title: 'Infrastructure Hosts', "url": nr1ExplorerUrl("(domain='INFRA' AND type='HOST')") },
+  { title: 'Synthetics', url: "https://one.newrelic.com/synthetics-nerdlets" },
+  { title: 'Logs', url: "https://one.newrelic.com/logger" },
+]
+
 export default function Command() {
   const [searchText, setSearchText] = useState("");
 
   const { data, isLoading } = QueryForEntities(searchText);
+  const shortcuts = getNewRelicShortcuts(searchText);
 
   return (
     <List
@@ -90,6 +104,9 @@ export default function Command() {
       searchBarPlaceholder="Search New Relic..."
       throttle
     >
+      <List.Section title="New Relic Capabilities">
+        {shortcuts}
+      </List.Section>
       <List.Section title="New Relic Entities" subtitle={data?.length + " items"}>
         {data?.map((searchResult: Entity) => (
           <SearchListItem key={searchResult.guid} searchResult={searchResult} />
@@ -97,6 +114,28 @@ export default function Command() {
       </List.Section>
     </List>
   );
+}
+
+function nr1ExplorerUrl(filters: string) {
+  return `https://one.newrelic.com/nr1-core?filters=${encodeURIComponent(filters)}`;
+}
+
+function getNewRelicShortcuts(searchText: string) {
+  return NrShortcuts
+    .filter((shortcut) => shortcut.title.toLowerCase().includes(searchText.toLowerCase()))
+    .map((shortcut) => {
+      return <List.Item
+        key={shortcut.url}
+        title={shortcut.title}
+        icon={{
+          source: "newrelic-icon.png",
+        }}
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser url={shortcut.url} title="Open In New Relic" />
+          </ActionPanel>}
+      />
+    });
 }
 
 
@@ -156,7 +195,7 @@ function QueryForEntities(searchText: string) {
   }`;
 
   return useFetch(endpoint, {
-    execute: searchText.length > 2,
+    execute: searchText.length > 0,
     method: "POST",
     headers: {
       'Content-Type': 'application/json',
