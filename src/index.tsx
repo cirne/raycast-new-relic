@@ -233,13 +233,11 @@ function getEntityInfo(entity: Entity) {
 async function parseFetchResponse(response: Response) {
 
   const json = await response.json();
-  console.log(JSON.stringify(json, null, 2));
-
-  const errorMessage = json.errors?.[0]?.message;
-  if (errorMessage && errorMessage.includes("Api-Key")) {
-    throw new Error("Invalid API Key");
-  }
-  else if (errorMessage) {
+  let errorMessage = json.errors?.[0]?.message;
+  if (errorMessage) {
+    if (errorMessage.includes("Api-Key")) {
+      errorMessage = "Invalid API Key";
+    }
     throw new Error(errorMessage);
   }
 
