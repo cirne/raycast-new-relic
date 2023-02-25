@@ -2,18 +2,18 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "new-relic",
   "title": "New Relic",
-  "description": "",
-  "icon": "command-icon.png",
+  "description": "Search Applications, Dashboard, Alerts, and more in New Relic",
+  "icon": "newrelic-icon.png",
   "author": "cirne",
   "categories": [
-    "Data"
+    "Developer Tools"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
       "title": "New Relic",
-      "description": "Search Applications, Dashboard, Alerts, and more in New Relic",
+      "description": "Search anything in New Relic",
       "mode": "view",
       "icon": "newrelic-icon.png"
     }
@@ -24,7 +24,7 @@
       "type": "password",
       "title": "New Relic API Key",
       "description": "Your personal New Relic API Key",
-      "placeholder": "See https://one.newrelic.com/api-keys ",
+      "placeholder": "See https://one.newrelic.com/api-keys",
       "required": true
     }
   ],
