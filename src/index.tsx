@@ -79,10 +79,10 @@ interface Preferences {
 }
 
 const NrShortcuts = [
-  { title: 'Entity Explorer', url: "https://one.newrelic.com" },
+  { title: 'All Entities', url: "https://one.newrelic.com/nr1-core" },
+  { title: 'Dashboards', url: "https://one.newrelic.com/dashboards" },
   { title: 'Alerts and AI', url: "https://one.newrelic.com/alerts-ai" },
   { title: 'Errors Inbox', url: "https://one.newrelic.com/errors-inbox" },
-  { title: 'Dashboards', url: "https://one.newrelic.com/dashboards" },
 
   { title: 'APM', "url": nr1ExplorerUrl("(filters=(domain IN ('APM', 'EXT') AND type IN ('APPLICATION', 'SERVICE')))") },
   { title: 'Browser', "url": nr1ExplorerUrl("(domain='BROWSER' AND type='APPLICATION')") },
