@@ -160,7 +160,7 @@ function QueryForEntities(searchText: string) {
     method: "POST",
     headers: {
       'Content-Type': 'application/json',
-      'API-Key': apiKey,
+      'API-Key': apiKey
     },
     body: JSON.stringify({ query }),
     parseResponse: parseFetchResponse,
@@ -233,9 +233,18 @@ function getEntityInfo(entity: Entity) {
 async function parseFetchResponse(response: Response) {
 
   const json = await response.json();
-  const { entities } = json.data.actor.entitySearch.results;
+  console.log(JSON.stringify(json, null, 2));
+
+  const errorMessage = json.errors?.[0]?.message;
+  if (errorMessage && errorMessage.includes("Api-Key")) {
+    throw new Error("Invalid API Key");
+  }
+  else if (errorMessage) {
+    throw new Error(errorMessage);
+  }
 
   // only show entity types we support
+  const { entities } = json.data.actor.entitySearch.results;
   return entities.filter((entity: Entity) => {
     return EntityTypes[entity.entityType];
   }).sort((e1: Entity, e2: Entity) => {
@@ -256,7 +265,5 @@ async function parseFetchResponse(response: Response) {
     }
 
     return e1.name.localeCompare(e2.name);
-  }).map((entity: Entity) => {
-    return entity;
-  })
+  });
 }
