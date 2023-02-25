@@ -1,6 +1,8 @@
 # New Relic
 Search Applications, Alerts, Dashboards and more in New Relic.
 
+![Demo](./metadata/demo.gif)
+
 ## New Relic User API License Key
 To use this extension, you need a [New Relic](https://newrelic.com) account. You can sign up [here](https://newrelic.com/signup).
 
