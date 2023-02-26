@@ -1,5 +1,5 @@
 # New Relic
-Search Applications, Alerts, Dashboards and more in New Relic.
+[Raycast](https://raycast.com) extension to search and view New Relic entities.
 
 ![Demo](./metadata/demo.gif)
 
