@@ -202,13 +202,15 @@ function QueryForEntities(searchText: string) {
 }
 
 function SearchListItem({ searchResult }: { searchResult: Entity }) {
-  const { icon, description } = getEntityInfo(searchResult);
+  const { icon, description, status } = getEntityInfo(searchResult);
+  console.log(status)
   return (
     <List.Item
       key={searchResult.guid}
       title={searchResult.name}
       icon={icon}
       subtitle={description}
+      accessories={status && [{ text: status }]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -225,37 +227,38 @@ function SearchListItem({ searchResult }: { searchResult: Entity }) {
 
 /* parse the entity summary data into a format for display in the list */
 function getEntityInfo(entity: Entity) {
-  const icon = EntityTypes[entity.entityType].icon;
-  let description = EntityTypes[entity.entityType].description;
+  const { icon, description } = EntityTypes[entity.entityType];
+  let status = null;
   const severity = Severities[entity.alertSeverity || "NOT_CONFIGURED"];
 
   if (entity.apmSummary) {
     const { errorRate, responseTimeAverage, throughput } = entity.apmSummary;
-    description =
+    status =
       `${Math.round(errorRate * 10000) / 100}% err ` +
       `${Math.round(responseTimeAverage * 100)} ms,` +
       `${Math.round(throughput)} rpm`;
   } else if (entity.browserSummary) {
     const { jsErrorRate, pageLoadThroughput, ajaxRequestThroughput } = entity.browserSummary;
-    description =
+    status =
       `${Math.round(jsErrorRate * 10000) / 100}% err ` +
       `${Math.round(pageLoadThroughput)} rpm ` +
       `${Math.round(ajaxRequestThroughput)} ajax`;
   } else if (entity.hostSummary) {
     const { cpuUtilizationPercent, diskUsedPercent, memoryUsedPercent } = entity.hostSummary;
-    description =
+    status =
       `${Math.round(cpuUtilizationPercent)}% cpu ` +
       `${Math.round(diskUsedPercent)}% disk ` +
       `${Math.round(memoryUsedPercent)}% mem `;
   } else if (entity.monitorSummary) {
     const { locationsFailing, locationsRunning, successRate } = entity.monitorSummary;
-    description =
+    status =
       `${Math.round(successRate * 10000) / 100}% success, ` +
       `${locationsFailing} / ${locationsRunning} locations failing`;
   }
 
   return {
     icon: { source: icon, tintColor: severity.color },
+    status,
     description,
   };
 }
@@ -297,3 +300,4 @@ async function parseFetchResponse(response: Response) {
       return e1.name.localeCompare(e2.name);
     });
 }
+
