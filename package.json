@@ -26,6 +26,28 @@
       "description": "Your personal New Relic API Key",
       "placeholder": "See https://one.newrelic.com/api-keys",
       "required": true
+    },
+    {
+      "name": "region",
+      "type": "dropdown",
+      "title": "New Relic Region",
+      "description": "Your New Relic Region",
+      "data": [
+        {
+          "title": "US",
+          "value": "US"
+        },
+        {
+          "title": "EU",
+          "value": "EU"
+        },
+        {
+          "title": "Staging (NR Internal Only)",
+          "value": "STAGING"
+        }
+      ],
+      "required": true,
+      "default": "US"
     }
   ],
   "dependencies": {

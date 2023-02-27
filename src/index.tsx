@@ -76,20 +76,36 @@ interface Entity {
 
 interface Preferences {
   apiKey?: string;
+  region: "US" | "EU" | "STAGING";
 }
 
 const NrShortcuts = [
-  { title: "All Entities", url: "https://one.newrelic.com/nr1-core" },
-  { title: "Dashboards", url: "https://one.newrelic.com/dashboards" },
-  { title: "Alerts and AI", url: "https://one.newrelic.com/alerts-ai" },
-  { title: "Errors Inbox", url: "https://one.newrelic.com/errors-inbox" },
+  { title: "All Entities", path: "/nr1-core" },
+  { title: "Dashboards", path: "/dashboards" },
+  { title: "Alerts and AI", path: "/alerts-ai" },
+  { title: "Errors Inbox", path: "/errors-inbox" },
 
-  { title: "APM", url: nr1ExplorerUrl("(filters=(domain IN ('APM', 'EXT') AND type IN ('APPLICATION', 'SERVICE')))") },
-  { title: "Browser", url: nr1ExplorerUrl("(domain='BROWSER' AND type='APPLICATION')") },
-  { title: "Infrastructure Hosts", url: nr1ExplorerUrl("(domain='INFRA' AND type='HOST')") },
-  { title: "Synthetics", url: "https://one.newrelic.com/synthetics-nerdlets" },
-  { title: "Logs", url: "https://one.newrelic.com/logger" },
+  { title: "APM", path: nr1ExplorerPath("(filters=(domain IN ('APM', 'EXT') AND type IN ('APPLICATION', 'SERVICE')))") },
+  { title: "Browser", path: nr1ExplorerPath("(domain='BROWSER' AND type='APPLICATION')") },
+  { title: "Infrastructure Hosts", path: nr1ExplorerPath("(domain='INFRA' AND type='HOST')") },
+  { title: "Synthetics", path: "/synthetics-nerdlets" },
+  { title: "Logs", path: "/logger" },
 ];
+
+const Regions = {
+  "US": {
+    ui: "https://one.newrelic.com",
+    api: "https://api.newrelic.com/graphql",
+  },
+  "EU": {
+    ui: "https://one.eu.newrelic.com",
+    api: "https://api.eu.newrelic.com/graphql",
+  },
+  "STAGING": {
+    ui: "https://one-staging.newrelic.com",
+    api: "https://staging-api.newrelic.com/graphql",
+  }
+}
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -109,23 +125,29 @@ export default function Command() {
   );
 }
 
-function nr1ExplorerUrl(filters: string) {
-  return `https://one.newrelic.com/nr1-core?filters=${encodeURIComponent(filters)}`;
+function nr1ExplorerPath(filters: string) {
+  return `/nr1-core?filters=${encodeURIComponent(filters)}`;
 }
 
 function getNewRelicShortcuts(searchText: string) {
+  function getUrl(path: string) {
+    const region = getPreferenceValues<Preferences>().region;
+    const hostname = Regions[region].ui;
+    return `https://${hostname}${path}`;
+  }
+
   return NrShortcuts.filter((shortcut) => shortcut.title.toLowerCase().includes(searchText.toLowerCase())).map(
     (shortcut) => {
       return (
         <List.Item
-          key={shortcut.url}
+          key={shortcut.path}
           title={shortcut.title}
           icon={{
             source: "newrelic-icon.png",
           }}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser url={shortcut.url} title="Open In New Relic" />
+              <Action.OpenInBrowser url={getUrl(shortcut.path)} title="Open In New Relic" />
             </ActionPanel>
           }
         />
@@ -136,7 +158,8 @@ function getNewRelicShortcuts(searchText: string) {
 
 function QueryForEntities(searchText: string) {
   const { apiKey } = getPreferenceValues<Preferences>();
-  const endpoint = "https://api.newrelic.com/graphql";
+  const region = getPreferenceValues<Preferences>().region;
+  const endpoint = Regions[region].api;
 
   // raycast won't call this until apiKey is defined, but lint is complaining
   if (!apiKey) return { data: [], isLoading: false };
