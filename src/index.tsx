@@ -210,7 +210,7 @@ function SearchListItem({ searchResult }: { searchResult: Entity }) {
       title={searchResult.name}
       icon={icon}
       subtitle={description}
-      accessories={status && [{ text: status }]}
+      accessories={status ? [{ text: status }] : []}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
