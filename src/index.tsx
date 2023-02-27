@@ -241,7 +241,7 @@ function getEntityInfo(entity: Entity) {
     status =
       `${Math.round(jsErrorRate * 10000) / 100}% err ` +
       `${Math.round(pageLoadThroughput)} rpm ` +
-      `${Math.round(ajaxRequestThroughput)} ajax`;
+      `${Math.round(ajaxRequestThroughput)} ajax rpm`;
   } else if (entity.hostSummary) {
     const { cpuUtilizationPercent, diskUsedPercent, memoryUsedPercent } = entity.hostSummary;
     status =
