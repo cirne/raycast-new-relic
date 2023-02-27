@@ -203,7 +203,6 @@ function QueryForEntities(searchText: string) {
 
 function SearchListItem({ searchResult }: { searchResult: Entity }) {
   const { icon, description, status } = getEntityInfo(searchResult);
-  console.log(status)
   return (
     <List.Item
       key={searchResult.guid}
