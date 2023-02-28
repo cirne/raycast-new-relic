@@ -133,7 +133,7 @@ function getNewRelicShortcuts(searchText: string) {
   function getUrl(path: string) {
     const region = getPreferenceValues<Preferences>().region;
     const hostname = Regions[region].ui;
-    return `https://${hostname}${path}`;
+    return `${hostname}${path}`;
   }
 
   return NrShortcuts.filter((shortcut) => shortcut.title.toLowerCase().includes(searchText.toLowerCase())).map(
