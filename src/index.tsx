@@ -1,6 +1,6 @@
 import { ActionPanel, Action, List, Icon, Color, getPreferenceValues } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
 import { useState } from "react";
+import queryNerdGraph, { Regions } from "./nerd-graph";
 
 /**
  * Disclaimer
@@ -74,11 +74,6 @@ interface Entity {
   };
 }
 
-interface Preferences {
-  apiKey?: string;
-  region: "US" | "EU" | "STAGING";
-}
-
 const NrShortcuts = [
   { title: "All Entities", path: "/nr1-core" },
   { title: "Dashboards", path: "/dashboards" },
@@ -91,20 +86,6 @@ const NrShortcuts = [
   { title: "Logs", path: "/logger" },
 ];
 
-const Regions = {
-  US: {
-    ui: "https://one.newrelic.com",
-    api: "https://api.newrelic.com/graphql",
-  },
-  EU: {
-    ui: "https://one.eu.newrelic.com",
-    api: "https://api.eu.newrelic.com/graphql",
-  },
-  STAGING: {
-    ui: "https://one-staging.newrelic.com",
-    api: "https://staging-api.newrelic.com/graphql",
-  },
-};
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -154,13 +135,6 @@ function getNewRelicShortcuts(searchText: string) {
 }
 
 function QueryForEntities(searchText: string) {
-  const { apiKey } = getPreferenceValues<Preferences>();
-  const region = getPreferenceValues<Preferences>().region;
-  const endpoint = Regions[region].api;
-
-  // raycast won't call this until apiKey is defined, but lint is complaining
-  if (!apiKey) return { data: [], isLoading: false };
-
   const query = `{
     actor {
       entitySearch(query: "name LIKE '${searchText}'") {
@@ -209,16 +183,8 @@ function QueryForEntities(searchText: string) {
     }
   }`;
 
-  return useFetch(endpoint, {
-    execute: searchText.length > 0,
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "API-Key": apiKey,
-    },
-    body: JSON.stringify({ query }),
-    parseResponse: parseFetchResponse,
-  });
+  return queryNerdGraph(query, parseFetchResponse)
+
 }
 
 function SearchListItem({ searchResult }: { searchResult: Entity }) {

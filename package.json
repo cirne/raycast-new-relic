@@ -16,6 +16,13 @@
       "description": "Search anything in New Relic",
       "mode": "view",
       "icon": "newrelic-icon.png"
+    },
+    {
+      "name": "search-logs",
+      "title": "Search Logs",
+      "description": "Search Logs in New Relic",
+      "mode": "view",
+      "icon": "newrelic-icon.png"
     }
   ],
   "preferences": [
