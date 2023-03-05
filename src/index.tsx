@@ -90,7 +90,9 @@ const NrShortcuts = [
 export default function Command() {
   const [searchText, setSearchText] = useState("");
 
-  const { data, isLoading } = QueryForEntities(searchText);
+  useEffect(async () => {
+    const
+  }, [searchText]);
   const shortcuts = getNewRelicShortcuts(searchText);
 
   return (
@@ -134,7 +136,7 @@ function getNewRelicShortcuts(searchText: string) {
   });
 }
 
-function QueryForEntities(searchText: string) {
+async function queryForEntities(searchText: string) {
   const query = `{
     actor {
       entitySearch(query: "name LIKE '${searchText}'") {
@@ -183,7 +185,8 @@ function QueryForEntities(searchText: string) {
     }
   }`;
 
-  return queryNerdGraph(query, parseFetchResponse)
+  const response = await queryNerdGraph(query)
+
 
 }
 
