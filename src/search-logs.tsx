@@ -31,6 +31,7 @@ export default function SearchLogs() {
     <List isLoading={accounts.length === 0}
       searchBarPlaceholder="Search New Relic Logs..."
       throttle
+      isShowingDetail
       onSearchTextChange={setSearchText}
       searchBarAccessory={getAccountsDropdown()}
     >
@@ -86,10 +87,8 @@ export default function SearchLogs() {
             { results } } } }`;
 
       const { data } = await queryNerdGraph(graphql);
-      console.log(JSON.stringify(data, null, 2));
-      const logMessages: string[] = data.actor.account.nrql.results;
+      const logMessages: LogMessage[] = data.actor.account.nrql.results;
       setLogMessages(logMessages)
-      console.log(data);
     })()
   }
 
@@ -97,13 +96,14 @@ export default function SearchLogs() {
 
 
 function LogMessage(props: { message: LogMessage }) {
+  const { message } = props;
   return (
     <List.Item
-      key={props.message.messageId}
-      title={props.message.message}
-      actions={<ActionPanel>
-        <Action.Push title="Show Details" target={<LogMessageDetail message={props.message} />} />
-      </ActionPanel>}
+      key={message.messageId}
+      title={message.message}
+      // actions={<ActionPanel>
+      // </ActionPanel>}
+      detail={<LogMessageDetail message={message} />}
     />
   )
 }
@@ -111,24 +111,27 @@ function LogMessage(props: { message: LogMessage }) {
 
 
 function LogMessageDetail(props: { message: LogMessage }) {
-  const markdown = "```\n" + props.message.message + "\n```";
+  const excludedKeys = ["messageId", "message", "timestamp", "entity.guid.INFRA", "entity.guids"];
+  const message = props.message;
 
-  const excludedKeys = ["messageId", "message", "timestamp"];
+  let markdown = "```\n" + message.message + "\n```\n\n";
   const metatdata = [] as { key: string, value: string | number }[];
-  for (const [key, value] of Object.entries(props.message)) {
+  for (const [key, value] of Object.entries(message)) {
     if (!excludedKeys.includes(key)) {
-      metatdata.push({ key, value });
+      // metatdata.push({ key, value });
+      // messageDump[key] = value;
+      markdown += `*  *${key}:* ${value} \n`;
     }
   }
+  // markdown += "\n\n```\n" + JSON.stringify(messageDump, null, 2) + "\n```";
 
   return (
-    <Detail markdown={markdown} metadata={
-      <Detail.Metadata>
+    <List.Item.Detail markdown={markdown} metadatax={
+      <List.Item.Detail.Metadata>
         {metatdata.map(({ key, value }) => (
-          <Detail.Metadata.Label key={key} title={key} text={value.toString()} />
+          <List.Item.Detail.Metadata.Label key={key} title={key} text={value.toString()} />
         ))}
 
-      </Detail.Metadata>
-    } />
-  )
+      </List.Item.Detail.Metadata>}
+    />)
 }
