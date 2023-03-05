@@ -82,10 +82,9 @@ interface Preferences {
 const NrShortcuts = [
   { title: "All Entities", path: "/nr1-core" },
   { title: "Dashboards", path: "/dashboards" },
-  { title: "Alerts and AI", path: "/alerts-ai" },
+  { title: "Alerts and AI", path: "/alerts-ai/home" },
   { title: "Errors Inbox", path: "/errors-inbox" },
-
-  { title: "APM", path: nr1ExplorerPath("(filters=(domain IN ('APM', 'EXT') AND type IN ('APPLICATION', 'SERVICE')))") },
+  { title: "APM", path: nr1ExplorerPath("(domain IN ('APM','EXT') AND type IN ('APPLICATION','SERVICE'))") },
   { title: "Browser", path: nr1ExplorerPath("(domain='BROWSER' AND type='APPLICATION')") },
   { title: "Infrastructure Hosts", path: nr1ExplorerPath("(domain='INFRA' AND type='HOST')") },
   { title: "Synthetics", path: "/synthetics-nerdlets" },
@@ -93,19 +92,19 @@ const NrShortcuts = [
 ];
 
 const Regions = {
-  "US": {
+  US: {
     ui: "https://one.newrelic.com",
     api: "https://api.newrelic.com/graphql",
   },
-  "EU": {
+  EU: {
     ui: "https://one.eu.newrelic.com",
     api: "https://api.eu.newrelic.com/graphql",
   },
-  "STAGING": {
+  STAGING: {
     ui: "https://one-staging.newrelic.com",
     api: "https://staging-api.newrelic.com/graphql",
-  }
-}
+  },
+};
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -136,24 +135,22 @@ function getNewRelicShortcuts(searchText: string) {
     return `${hostname}${path}`;
   }
 
-  return NrShortcuts.filter((shortcut) => shortcut.title.toLowerCase().includes(searchText.toLowerCase())).map(
-    (shortcut) => {
-      return (
-        <List.Item
-          key={shortcut.path}
-          title={shortcut.title}
-          icon={{
-            source: "newrelic-icon.png",
-          }}
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser url={getUrl(shortcut.path)} title="Open In New Relic" />
-            </ActionPanel>
-          }
-        />
-      );
-    }
-  );
+  return NrShortcuts.filter((shortcut) => shortcut.title.toLowerCase().includes(searchText.toLowerCase())).map((shortcut) => {
+    return (
+      <List.Item
+        key={shortcut.path}
+        title={shortcut.title}
+        icon={{
+          source: "newrelic-icon.png",
+        }}
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser url={getUrl(shortcut.path)} title="Open In New Relic" />
+          </ActionPanel>
+        }
+      />
+    );
+  });
 }
 
 function QueryForEntities(searchText: string) {
@@ -255,27 +252,16 @@ function getEntityInfo(entity: Entity) {
 
   if (entity.apmSummary) {
     const { errorRate, responseTimeAverage, throughput } = entity.apmSummary;
-    status =
-      `${Math.round(errorRate * 10000) / 100}% err ` +
-      `${Math.round(responseTimeAverage * 100)} ms,` +
-      `${Math.round(throughput)} rpm`;
+    status = `${Math.round(errorRate * 10000) / 100}% err ` + `${Math.round(responseTimeAverage * 100)} ms,` + `${Math.round(throughput)} rpm`;
   } else if (entity.browserSummary) {
     const { jsErrorRate, pageLoadThroughput, ajaxRequestThroughput } = entity.browserSummary;
-    status =
-      `${Math.round(jsErrorRate * 10000) / 100}% err ` +
-      `${Math.round(pageLoadThroughput)} rpm ` +
-      `${Math.round(ajaxRequestThroughput)} ajax rpm`;
+    status = `${Math.round(jsErrorRate * 10000) / 100}% err ` + `${Math.round(pageLoadThroughput)} rpm ` + `${Math.round(ajaxRequestThroughput)} ajax rpm`;
   } else if (entity.hostSummary) {
     const { cpuUtilizationPercent, diskUsedPercent, memoryUsedPercent } = entity.hostSummary;
-    status =
-      `${Math.round(cpuUtilizationPercent)}% cpu ` +
-      `${Math.round(diskUsedPercent)}% disk ` +
-      `${Math.round(memoryUsedPercent)}% mem `;
+    status = `${Math.round(cpuUtilizationPercent)}% cpu ` + `${Math.round(diskUsedPercent)}% disk ` + `${Math.round(memoryUsedPercent)}% mem `;
   } else if (entity.monitorSummary) {
     const { locationsFailing, locationsRunning, successRate } = entity.monitorSummary;
-    status =
-      `${Math.round(successRate * 10000) / 100}% success, ` +
-      `${locationsFailing} / ${locationsRunning} locations failing`;
+    status = `${Math.round(successRate * 10000) / 100}% success, ` + `${locationsFailing} / ${locationsRunning} locations failing`;
   }
 
   return {
@@ -322,4 +308,3 @@ async function parseFetchResponse(response: Response) {
       return e1.name.localeCompare(e2.name);
     });
 }
-
