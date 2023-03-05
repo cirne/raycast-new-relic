@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useFetch } from "@raycast/utils";
+import queryNerdGraph from "./nerd-graph";
 
 type Account = {
   id: number;
@@ -23,5 +23,6 @@ async function getAccounts(): Promise<Account[]> {
   const nrql = `{
     actor { accounts { id name } } 
   }`
+
 
 }
