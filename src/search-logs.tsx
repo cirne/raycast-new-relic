@@ -18,6 +18,7 @@ export default function SearchLogs() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [accountId, setAccountId] = useState<number>(3774651);
   const [logMessages, setLogMessages] = useState<LogMessage[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(loadAccounts, [])
   useEffect(() => {
@@ -28,7 +29,7 @@ export default function SearchLogs() {
 
 
   return (
-    <List isLoading={accounts.length === 0}
+    <List isLoading={accounts.length === 0 || isLoading}
       searchBarPlaceholder="Search New Relic Logs..."
       throttle
       isShowingDetail
@@ -79,16 +80,32 @@ export default function SearchLogs() {
         setLogMessages([]);
         return
       }
+      try {
+        setIsLoading(true);
 
-      const nrql = getQuery();
-      const graphql = `{ actor
-        { account(id: ${accountId}) 
-          { nrql(query: "${nrql}")
-            { results } } } }`;
+        const nrql = getQuery();
+        const graphql = `{ actor
+          { account(id: ${accountId}) 
+            { nrql(query: "${nrql}" timeout: 30)
+              { results } } } }`;
 
-      const { data } = await queryNerdGraph(graphql);
-      const logMessages: LogMessage[] = data.actor.account.nrql.results;
-      setLogMessages(logMessages)
+        const { data, errors } = await queryNerdGraph(graphql);
+        if (errors) {
+          throw errors[0].message;
+        }
+
+        const logMessages: LogMessage[] = data?.actor?.account?.nrql?.results;
+        if (!logMessages) {
+          throw "Error querying New Relic Logs"
+        }
+        setLogMessages(logMessages)
+        setIsLoading(false);
+      }
+      catch (error) {
+        console.error(error);
+        setIsLoading(false);
+        setLogMessages([]);
+      }
     })()
   }
 
@@ -99,7 +116,6 @@ function LogMessage(props: { message: LogMessage }) {
   const { message } = props;
   return (
     <List.Item
-      key={message.messageId}
       title={message.message}
       // actions={<ActionPanel>
       // </ActionPanel>}
