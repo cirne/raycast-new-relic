@@ -1,5 +1,5 @@
 import { ActionPanel, Action, List, Icon, Color, getPreferenceValues } from "@raycast/api";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import queryNerdGraph, { Regions } from "./nerd-graph";
 
 /**
@@ -89,17 +89,32 @@ const NrShortcuts = [
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
+  const [entities, setEntities] = useState<Entity[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(async () => {
-    const
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setIsLoading(true);
+        const data = await queryForEntities(searchText);
+        setEntities(data);
+        setIsLoading(false);
+      }
+      catch (error) {
+        console.log(error);
+        setIsLoading(false);
+      }
+    })()
   }, [searchText]);
+
   const shortcuts = getNewRelicShortcuts(searchText);
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search New Relic..." throttle>
+    <List isLoading={isLoading} searchText={searchText} onSearchTextChange={setSearchText} searchBarPlaceholder="Search New Relic..." throttle>
       <List.Section title="New Relic Capabilities">{shortcuts}</List.Section>
-      <List.Section title="New Relic Entities" subtitle={data?.length + " items"}>
-        {data?.map((searchResult: Entity) => (
+      <List.Section title="New Relic Entities" subtitle={entities?.length + " items"}>
+        {entities?.map((searchResult: Entity) => (
           <SearchListItem key={searchResult.guid} searchResult={searchResult} />
         ))}
       </List.Section>
@@ -185,8 +200,8 @@ async function queryForEntities(searchText: string) {
     }
   }`;
 
-  const response = await queryNerdGraph(query)
-
+  const json = await queryNerdGraph(query)
+  return parseFetchResponse(json);
 
 }
 
@@ -241,8 +256,7 @@ function getEntityInfo(entity: Entity) {
 }
 
 // Parse the entity query response from NerdGraph and check for errors
-async function parseFetchResponse(response: Response) {
-  const json = await response.json();
+function parseFetchResponse(json) {
   let errorMessage = json.errors?.[0]?.message;
   if (errorMessage) {
     if (errorMessage.includes("Api-Key")) {

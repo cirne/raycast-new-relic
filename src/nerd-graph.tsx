@@ -1,5 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
-import { fetch } from 'node-fetch';
+import fetch from 'node-fetch';
+
 interface Preferences {
   apiKey?: string;
   region: "US" | "EU" | "STAGING";
@@ -38,5 +39,5 @@ export default async function queryNerdGraph(graphql: string): any {
 
   });
   const data = await response.json();
-  return JSON.parse(data);
+  return data;
 }
