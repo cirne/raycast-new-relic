@@ -83,11 +83,8 @@ const NrShortcuts = [
   { title: "All Entities", path: "/nr1-core" },
   { title: "Dashboards", path: "/dashboards" },
   { title: "Alerts and AI", path: "/alerts-ai/home" },
-  { title: "Errors Inbox", path: "/errors-inbox" },
   { title: "APM", path: nr1ExplorerPath("(domain IN ('APM','EXT') AND type IN ('APPLICATION','SERVICE'))") },
-  { title: "Browser", path: nr1ExplorerPath("(domain='BROWSER' AND type='APPLICATION')") },
   { title: "Infrastructure Hosts", path: nr1ExplorerPath("(domain='INFRA' AND type='HOST')") },
-  { title: "Synthetics", path: "/synthetics-nerdlets" },
   { title: "Logs", path: "/logger" },
 ];
 
@@ -114,7 +111,7 @@ export default function Command() {
 
   return (
     <List
-      isLoading={isLoading && searchText.length > 0}
+      isLoading={isLoading}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search New Relic..."
       throttle>
@@ -214,7 +211,7 @@ function QueryForEntities(searchText: string) {
   }`;
 
   return useFetch(endpoint, {
-    execute: searchText.length > 0,
+    execute: true,
     method: "POST",
     headers: {
       "Content-Type": "application/json",
